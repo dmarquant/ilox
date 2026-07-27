@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <iostream>
 #include "token.h"
 
@@ -18,16 +19,16 @@ struct Visitor {
 };
 
 struct Expr {
+  virtual ~Expr() = default;
   virtual void accept(Visitor* visitor) = 0;
 };
 
-
-
-
 struct BinaryExpr : public Expr {
-  Expr* left;
+  unique_ptr<Expr> left;
   Token op;
-  Expr* right;
+  unique_ptr<Expr> right;
+
+  BinaryExpr(Expr* left, Token op, Expr* right) : left(left), op(op), right(right) {}
 
   void accept(Visitor* visitor) override {
     visitor->visitBinaryExpr(this);
@@ -35,7 +36,9 @@ struct BinaryExpr : public Expr {
 };
 
 struct GroupingExpr : public Expr {
-  Expr* expr;
+  unique_ptr<Expr> expr;
+
+  GroupingExpr(Expr* expr) : expr(expr) {}
 
   void accept(Visitor* visitor) override {
     visitor->visitGroupingExpr(this);
@@ -43,7 +46,11 @@ struct GroupingExpr : public Expr {
 };
 
 struct LiteralExpr : public Expr {
-  Literal value;
+  optional<Literal> value;
+
+  LiteralExpr(optional<Literal> val) {
+    this->value = val;
+  }
 
   void accept(Visitor* visitor) override {
     visitor->visitLiteralExpr(this);
@@ -52,7 +59,9 @@ struct LiteralExpr : public Expr {
 
 struct UnaryExpr : public Expr {
   Token op;
-  Expr* expr;
+  unique_ptr<Expr> expr;
+
+  UnaryExpr(Token op, Expr* expr) : op(op), expr(expr) {}
 
   void accept(Visitor* visitor) override {
     visitor->visitUnaryExpr(this);
@@ -85,8 +94,12 @@ struct AstPrinter : public Visitor {
   }
 
   void visitLiteralExpr(LiteralExpr* expr) override {
-    visit([](const auto& value) {
-        cout << value;
-    }, expr->value);
+    if (expr->value.has_value()) {
+      visit([](const auto& value) {
+          cout << boolalpha << value;
+      }, expr->value.value());
+    } else {
+      cout << "nil";
+    }
   }
 };

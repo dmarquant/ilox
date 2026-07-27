@@ -10,6 +10,7 @@
 #include "ilox.h"
 #include "scanner.h"
 #include "token.h"
+#include "parser.h"
 
 using namespace std;
 
@@ -27,8 +28,12 @@ void error(int line, string message) {
 
 void run(string src) {
   vector<Token> tokens = scanTokens(src);
-  for (Token token : tokens) {
-    cout << token << '\n';
+  Expr* expr = parseExpr(tokens);
+  
+  if (expr) {
+    AstPrinter p;
+    p.printExpr(expr);
+    cout << endl;
   }
 }
 
@@ -68,16 +73,6 @@ void runPrompt() {
 }
 
 int main(int argc, char** argv) {
-  LiteralExpr* l = new LiteralExpr();
-  l->value = 43.1;
-
-  UnaryExpr* u = new UnaryExpr();
-  u->op = { .type = TokenType::PLUS, .lexeme = "+" };
-  u->expr = l;
-  
-  AstPrinter p;
-  p.printExpr(u);
-  cout << endl;
 
   if (argc > 2) {
     cout << "Usage: jlox [script]\n";
