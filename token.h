@@ -71,6 +71,7 @@ constexpr std::string_view tokenTypeToString(TokenType type) {
 }
 
 using Literal = variant<bool, double, string>;
+using Value = optional<variant<bool, double, string>>;
 
 struct Token {
     TokenType type;
@@ -86,6 +87,18 @@ ostream& operator<<(ostream& os, const Token& token) {
       visit([&os](const auto& value) {
           os << value;
       }, token.literal.value());
+    }
+    return os;
+}
+
+ostream& operator<<(ostream& os, const Value& value) {
+    if (value.has_value()) {
+      os << boolalpha;
+      visit([&os](const auto& value) {
+          os << value;
+      }, value.value());
+    } else {
+      os << "nil";
     }
     return os;
 }

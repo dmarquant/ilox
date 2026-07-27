@@ -1,1 +1,1 @@
-clang++ -std=c++20 ilox.cpp
+clang++ -std=c++20 ilox.cpp -g

@@ -11,6 +11,7 @@
 #include "scanner.h"
 #include "token.h"
 #include "parser.h"
+#include "interpreter.h"
 
 using namespace std;
 
@@ -31,8 +32,8 @@ void run(string src) {
   Expr* expr = parseExpr(tokens);
   
   if (expr) {
-    AstPrinter p;
-    p.printExpr(expr);
+    Interpreter interpreter;
+    cout << "= " << interpreter.eval(expr);
     cout << endl;
   }
 }

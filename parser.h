@@ -12,7 +12,18 @@ struct Parser {
   bool hasError = false;
 
   Expr* expr() {
-    return hasError ? nullptr : equality();
+    return hasError ? nullptr : comma();
+  }
+
+  Expr* comma() {
+    Expr* expr = equality();
+
+    while (match(TokenType::COMMA)) {
+      Token op = previous();
+      Expr* right = comma();
+      expr = new BinaryExpr(expr, op, right);
+    }
+    return expr;
   }
 
   Expr* equality() {
