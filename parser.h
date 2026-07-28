@@ -12,15 +12,15 @@ struct Parser {
   int current = 0;
   bool hasError = false;
 
-  vector<Stmt> parse() {
-    vector<Stmt> statements;
+  vector<Stmt*> parse() {
+    vector<Stmt*> statements;
     while (!isAtEnd()) {
       statements.push_back(declaration());
     }
     return statements;    
   }
 
-  Stmt declaration() {
+  Stmt* declaration() {
     if (match(TokenType::VAR)) {
       return varDeclaration();
     } else {
@@ -28,7 +28,7 @@ struct Parser {
     }
   }
 
-  Stmt varDeclaration() {
+  Stmt* varDeclaration() {
     if (match(TokenType::IDENTIFIER)) {
       Token name = previous();
 
@@ -37,40 +37,47 @@ struct Parser {
         initializer = expr();
       }
 
-      advance(); // TODO: Semicolon!!
+      if (!match(TokenType::SEMICOLON)) {
+        hasError = true;
+        error(peek().line, "Expected ';' after statement");
+        return nullptr;
+      }
 
-      return VarStmt(name.lexeme, initializer);
+      return new Stmt(VarStmt(name.lexeme, initializer));
     } else {
-      // TODO: Hack. Need proper error propagation
-      return stmt();
+      hasError = true;
+      error(peek().line, "Expected identifier after 'var'");
+      return nullptr;
     }
   }
 
-  Stmt stmt() {
+  Stmt* stmt() {
     if (match(TokenType::PRINT)) return printStmt();
     return exprStmt();
   }
 
-  Stmt printStmt() {
+  Stmt* printStmt() {
     Expr* value = expr();
 
     if (!match(TokenType::SEMICOLON)) {
       hasError = true;
       error(peek().line, "Expected ';' after expression");
+      return nullptr;
     }
 
-    return PrintStmt(value);
+    return new Stmt(PrintStmt(value));
   }
 
-  Stmt exprStmt() {
+  Stmt* exprStmt() {
     Expr* value = expr();
 
     if (!match(TokenType::SEMICOLON)) {
       hasError = true;
       error(peek().line, "Expected ';' after expression");
+      return nullptr;
     }
 
-    return ExpressionStmt(value);
+    return new Stmt(ExpressionStmt(value));
   }
 
   Expr* expr() {
@@ -193,7 +200,7 @@ struct Parser {
   }
 };
 
-optional<vector<Stmt>> parseStatements(const vector<Token>& tokens) {
+optional<vector<Stmt*>> parseStatements(const vector<Token>& tokens) {
   Parser p{
     .tokens = tokens
   };
