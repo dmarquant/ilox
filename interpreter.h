@@ -27,6 +27,11 @@ struct Interpreter {
     // Could do nothing, since expressions can't have sideeffects (yet)
   }
 
+  void operator () (const VarStmt& stmt) {
+    Value val = stmt.initializer ? eval(stmt.initializer) : nullptr;
+    cout << "Setting variable '" << stmt.name << "' to " << val << endl;
+  }
+
   Value operator() (const BinaryExpr& expr) {
     Value left = eval(expr.left);
     Value right = eval(expr.right);

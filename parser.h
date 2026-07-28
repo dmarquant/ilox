@@ -15,9 +15,35 @@ struct Parser {
   vector<Stmt> parse() {
     vector<Stmt> statements;
     while (!isAtEnd()) {
-      statements.push_back(stmt());
+      statements.push_back(declaration());
     }
     return statements;    
+  }
+
+  Stmt declaration() {
+    if (match(TokenType::VAR)) {
+      return varDeclaration();
+    } else {
+      return stmt();
+    }
+  }
+
+  Stmt varDeclaration() {
+    if (match(TokenType::IDENTIFIER)) {
+      Token name = previous();
+
+      Expr* initializer = nullptr;
+      if (match(TokenType::EQUAL)) {
+        initializer = expr();
+      }
+
+      advance(); // TODO: Semicolon!!
+
+      return VarStmt(name.lexeme, initializer);
+    } else {
+      // TODO: Hack. Need proper error propagation
+      return stmt();
+    }
   }
 
   Stmt stmt() {

@@ -18,5 +18,12 @@ struct ExpressionStmt {
   ExpressionStmt(Expr* expr) : expr(expr) {}
 };
 
-using Stmt = variant<PrintStmt, ExpressionStmt>;
+struct VarStmt {
+  string name;
+  Expr* initializer;
+
+  VarStmt(string name, Expr* initializer) : name(name), initializer(initializer) {}
+};
+
+using Stmt = variant<PrintStmt, ExpressionStmt, VarStmt>;
 
