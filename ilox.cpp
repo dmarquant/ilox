@@ -29,6 +29,10 @@ void error(int line, string message) {
 
 void run(string src) {
   vector<Token> tokens = scanTokens(src);
+
+  // Expressions are leaked for now. To fix that I can simply add an arena allocator
+  // for the parser and discard the whole thing once I'm done.
+
   Expr* expr = parseExpr(tokens);
   
   if (expr) {

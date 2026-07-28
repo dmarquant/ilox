@@ -11,91 +11,32 @@ struct GroupingExpr;
 struct LiteralExpr;
 struct UnaryExpr;
 
-struct Visitor {
-  virtual void visitBinaryExpr(BinaryExpr* expr) = 0;
-  virtual void visitGroupingExpr(GroupingExpr* expr) = 0;
-  virtual void visitLiteralExpr(LiteralExpr* expr) = 0;
-  virtual void visitUnaryExpr(UnaryExpr* expr) = 0;
-};
+using Expr = variant<BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr>;
 
-struct Expr {
-  virtual ~Expr() = default;
-  virtual void accept(Visitor* visitor) = 0;
-};
-
-struct BinaryExpr : public Expr {
-  unique_ptr<Expr> left;
+struct BinaryExpr {
+  Expr* left;
   Token op;
-  unique_ptr<Expr> right;
+  Expr* right;
 
   BinaryExpr(Expr* left, Token op, Expr* right) : left(left), op(op), right(right) {}
-
-  void accept(Visitor* visitor) override {
-    visitor->visitBinaryExpr(this);
-  }
 };
 
-struct GroupingExpr : public Expr {
-  unique_ptr<Expr> expr;
+struct GroupingExpr {
+  Expr* expr;
 
   GroupingExpr(Expr* expr) : expr(expr) {}
-
-  void accept(Visitor* visitor) override {
-    visitor->visitGroupingExpr(this);
-  }
 };
 
-struct LiteralExpr : public Expr {
+struct LiteralExpr {
   Value value;
 
-  LiteralExpr(Value val) {
-    this->value = val;
-  }
-
-  void accept(Visitor* visitor) override {
-    visitor->visitLiteralExpr(this);
-  }
+  LiteralExpr(Value val) : value(val) {}
 };
 
-struct UnaryExpr : public Expr {
+struct UnaryExpr {
   Token op;
-  unique_ptr<Expr> expr;
+  Expr* expr;
 
   UnaryExpr(Token op, Expr* expr) : op(op), expr(expr) {}
-
-  void accept(Visitor* visitor) override {
-    visitor->visitUnaryExpr(this);
-  }
 };
 
-struct AstPrinter : public Visitor {
-  void printExpr(Expr* expr) {
-    expr->accept(this);
-  }
-
-  void visitBinaryExpr(BinaryExpr* expr) override {
-    cout << '(' << expr->op.lexeme << ' ';
-    expr->left->accept(this);
-    cout << ' ';
-    expr->right->accept(this);
-    cout << ')';
-  }
-
-  void visitGroupingExpr(GroupingExpr* expr) override {
-    cout << "(group ";
-    expr->expr->accept(this);
-    cout << ')';
-  }
-
-  void visitUnaryExpr(UnaryExpr* expr) override {
-    cout << '(' << expr->op.lexeme << ' ';
-    expr->expr->accept(this);
-    cout << ')';
-  }
-
-  void visitLiteralExpr(LiteralExpr* expr) override {
-    visit([](const auto& value) {
-        cout << boolalpha << value;
-    }, expr->value);
-  }
-};
