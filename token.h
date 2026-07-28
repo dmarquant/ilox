@@ -70,35 +70,21 @@ constexpr std::string_view tokenTypeToString(TokenType type) {
     return "UNKNOWN";
 }
 
-using Literal = variant<bool, double, string>;
-using Value = optional<variant<bool, double, string>>;
+using Value = variant<bool, double, string, nullptr_t>;
 
 struct Token {
     TokenType type;
     string lexeme;
-    optional<Literal> literal;
+    Value literal;
     int line;
 };
 
-ostream& operator<<(ostream& os, const Token& token) {
-    os << tokenTypeToString(token.type) << " '" << token.lexeme << "'";
-    if (token.literal.has_value()) {
-      os << " " << boolalpha;
-      visit([&os](const auto& value) {
-          os << value;
-      }, token.literal.value());
-    }
-    return os;
-}
-
 ostream& operator<<(ostream& os, const Value& value) {
-    if (value.has_value()) {
-      os << boolalpha;
-      visit([&os](const auto& value) {
-          os << value;
-      }, value.value());
-    } else {
-      os << "nil";
-    }
-    return os;
+  if (holds_alternative<nullptr_t>(value)) {
+    os << "nil";
+  } else {
+    os << boolalpha;
+    visit([&os](const auto& value) { os << value; }, value);
+  }
+  return os;
 }

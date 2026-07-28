@@ -6,7 +6,7 @@ using namespace std;
 
 
 struct Interpreter : public Visitor {
-  Value value = nullopt;
+  Value value = nullptr;
 
   string error = "";
 
@@ -38,66 +38,66 @@ struct Interpreter : public Visitor {
         break;
       case TokenType::GREATER:
         if (checkNumbers(expr->op, left, right)) {
-          value = get<double>(left.value()) > get<double>(right.value());
+          value = get<double>(left) > get<double>(right);
         } else {
-          value = nullopt;
+          value = nullptr;
         }
         break;
       case TokenType::GREATER_EQUAL:
         if (checkNumbers(expr->op, left, right)) {
-          value = get<double>(left.value()) >= get<double>(right.value());
+          value = get<double>(left) >= get<double>(right);
         } else {
-          value = nullopt;
+          value = nullptr;
         }
         break;
       case TokenType::LESS:
         if (checkNumbers(expr->op, left, right)) {
-          value = get<double>(left.value()) < get<double>(right.value());
+          value = get<double>(left) < get<double>(right);
         } else {
-          value = nullopt;
+          value = nullptr;
         }
         break;
       case TokenType::LESS_EQUAL:
         if (checkNumbers(expr->op, left, right)) {
-          value = get<double>(left.value()) <= get<double>(right.value());
+          value = get<double>(left) <= get<double>(right);
         } else {
-          value = nullopt;
+          value = nullptr;
         }
         break;
       case TokenType::MINUS:
         if (checkNumbers(expr->op, left, right)) {
-          value = get<double>(left.value()) - get<double>(right.value());
+          value = get<double>(left) - get<double>(right);
         } else {
-          value = nullopt;
+          value = nullptr;
         }
         break;
       case TokenType::SLASH:
         if (checkNumbers(expr->op, left, right)) {
-          value = get<double>(left.value()) / get<double>(right.value());
+          value = get<double>(left) / get<double>(right);
         } else {
-          value = nullopt;
+          value = nullptr;
         }
         break;
       case TokenType::STAR:
         if (checkNumbers(expr->op, left, right)) {
-          value = get<double>(left.value()) * get<double>(right.value());
+          value = get<double>(left) * get<double>(right);
         } else {
-          value = nullopt;
+          value = nullptr;
         }
         break;
 
       case TokenType::PLUS:
-        if (holds_alternative<double>(left.value()) && holds_alternative<double>(right.value())) {
-          value = get<double>(left.value()) + get<double>(right.value());
-        } else if (holds_alternative<string>(left.value()) && holds_alternative<string>(right.value())) {
-          value = get<string>(left.value()) + get<string>(right.value());
+        if (holds_alternative<double>(left) && holds_alternative<double>(right)) {
+          value = get<double>(left) + get<double>(right);
+        } else if (holds_alternative<string>(left) && holds_alternative<string>(right)) {
+          value = get<string>(left) + get<string>(right);
         } else {
           setError("Operands for '" + expr->op.lexeme + "' must both be numbers or strings");
         }
         break;
 
       default:
-        value = nullopt;
+        value = nullptr;
         break;
     }
   }
@@ -112,9 +112,9 @@ struct Interpreter : public Visitor {
     switch (expr->op.type) {
       case TokenType::MINUS:
         if (checkNumber(expr->op, right)) {
-          value = -get<double>(right.value());
+          value = -get<double>(right);
         } else {
-          value = nullopt;
+          value = nullptr;
         }
         break;
 
@@ -123,7 +123,7 @@ struct Interpreter : public Visitor {
         break;
 
       default:
-        value = nullopt;
+        value = nullptr;
     }
   }
 
@@ -132,7 +132,7 @@ struct Interpreter : public Visitor {
   }
 
   bool checkNumber(Token op, Value val) {
-    if (!val.has_value() || !holds_alternative<double>(val.value())) {
+    if (!holds_alternative<double>(val)) {
       setError("Operand for '" + op.lexeme + "' must be a number");
       return false;
     } else {
@@ -141,8 +141,7 @@ struct Interpreter : public Visitor {
   }
 
   bool checkNumbers(Token op, Value left, Value right) {
-    if (!left.has_value() || !right.has_value() 
-        || !holds_alternative<double>(left.value()) || !holds_alternative<double>(right.value())) {
+    if (!holds_alternative<double>(left) || !holds_alternative<double>(right)) {
       setError("Operands for '" + op.lexeme + "' must be numbers");
       return false;
     } else {
@@ -151,14 +150,12 @@ struct Interpreter : public Visitor {
   }
 
   bool isTruthy(Value value) {
-    if (value.has_value()) {
-      if (holds_alternative<bool>(value.value())) {
-        return get<bool>(value.value());
-      } else {
-        return true;
-      }
-    } else {
+    if (holds_alternative<nullptr_t>(value)) {
       return false;
+    } else if (holds_alternative<bool>(value)) {
+      return get<bool>(value);
+    } else {
+      return true;
     }
   }
 };

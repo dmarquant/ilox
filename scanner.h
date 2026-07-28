@@ -42,7 +42,7 @@ struct Scanner {
       scanToken();
     }
 
-    tokens.push_back({.type = TokenType::END_OF_FILE, .lexeme = "", .literal = nullopt, .line = line});
+    tokens.push_back({.type = TokenType::END_OF_FILE, .lexeme = "", .literal = nullptr, .line = line});
     return tokens;
   }
 
@@ -157,7 +157,7 @@ struct Scanner {
   }
 
   void addToken(TokenType type) {
-    addToken(type, nullopt);
+    addToken(type, nullptr);
   }
 
   bool match(char expected) {
@@ -168,7 +168,7 @@ struct Scanner {
     return true;
   }
 
-  void addToken(TokenType type, optional<Literal> literal) {
+  void addToken(TokenType type, Value literal) {
     string text = src.substr(start, current-start);
     tokens.push_back({.type = type, .lexeme = text, .literal = literal, .line = line});
   }

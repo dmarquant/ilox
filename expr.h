@@ -46,9 +46,9 @@ struct GroupingExpr : public Expr {
 };
 
 struct LiteralExpr : public Expr {
-  optional<Literal> value;
+  Value value;
 
-  LiteralExpr(optional<Literal> val) {
+  LiteralExpr(Value val) {
     this->value = val;
   }
 
@@ -94,12 +94,8 @@ struct AstPrinter : public Visitor {
   }
 
   void visitLiteralExpr(LiteralExpr* expr) override {
-    if (expr->value.has_value()) {
-      visit([](const auto& value) {
-          cout << boolalpha << value;
-      }, expr->value.value());
-    } else {
-      cout << "nil";
-    }
+    visit([](const auto& value) {
+        cout << boolalpha << value;
+    }, expr->value);
   }
 };

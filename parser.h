@@ -84,10 +84,10 @@ struct Parser {
   Expr* primary() {
     if (match(TokenType::FALSE)) return new LiteralExpr(false);
     if (match(TokenType::TRUE)) return new LiteralExpr(true);
-    if (match(TokenType::NIL)) return new LiteralExpr(nullopt);
+    if (match(TokenType::NIL)) return new LiteralExpr(nullptr);
 
     if (match(TokenType::NUMBER) || match(TokenType::STRING)) {
-      return new LiteralExpr(previous().literal.value());
+      return new LiteralExpr(previous().literal);
     }
 
     if (match(TokenType::LEFT_PAREN)) {
