@@ -8,9 +8,18 @@ using namespace std;
 struct Interpreter : public Visitor {
   Value value = nullopt;
 
+  string error = "";
+
   Value eval(Expr* expr) {
     expr->accept(this);
     return value;
+  }
+
+  void setError(string err) {
+    // Only report the first error
+    if (error.empty()) {
+      error = err;
+    }
   }
 
   void visitBinaryExpr(BinaryExpr* expr) override {
@@ -18,6 +27,9 @@ struct Interpreter : public Visitor {
     Value right = eval(expr->right.get());
 
     switch (expr->op.type) {
+      case TokenType::COMMA:
+        value = right;
+        break;
       case TokenType::EQUAL_EQUAL:
         value = left == right;
         break;
@@ -25,25 +37,53 @@ struct Interpreter : public Visitor {
         value = left != right;
         break;
       case TokenType::GREATER:
-        value = get<double>(left.value()) > get<double>(right.value());
+        if (checkNumbers(expr->op, left, right)) {
+          value = get<double>(left.value()) > get<double>(right.value());
+        } else {
+          value = nullopt;
+        }
         break;
       case TokenType::GREATER_EQUAL:
-        value = get<double>(left.value()) >= get<double>(right.value());
+        if (checkNumbers(expr->op, left, right)) {
+          value = get<double>(left.value()) >= get<double>(right.value());
+        } else {
+          value = nullopt;
+        }
         break;
       case TokenType::LESS:
-        value = get<double>(left.value()) < get<double>(right.value());
+        if (checkNumbers(expr->op, left, right)) {
+          value = get<double>(left.value()) < get<double>(right.value());
+        } else {
+          value = nullopt;
+        }
         break;
       case TokenType::LESS_EQUAL:
-        value = get<double>(left.value()) <= get<double>(right.value());
+        if (checkNumbers(expr->op, left, right)) {
+          value = get<double>(left.value()) <= get<double>(right.value());
+        } else {
+          value = nullopt;
+        }
         break;
       case TokenType::MINUS:
-        value = get<double>(left.value()) - get<double>(right.value());
+        if (checkNumbers(expr->op, left, right)) {
+          value = get<double>(left.value()) - get<double>(right.value());
+        } else {
+          value = nullopt;
+        }
         break;
       case TokenType::SLASH:
-        value = get<double>(left.value()) / get<double>(right.value());
+        if (checkNumbers(expr->op, left, right)) {
+          value = get<double>(left.value()) / get<double>(right.value());
+        } else {
+          value = nullopt;
+        }
         break;
       case TokenType::STAR:
-        value = get<double>(left.value()) * get<double>(right.value());
+        if (checkNumbers(expr->op, left, right)) {
+          value = get<double>(left.value()) * get<double>(right.value());
+        } else {
+          value = nullopt;
+        }
         break;
 
       case TokenType::PLUS:
@@ -51,6 +91,8 @@ struct Interpreter : public Visitor {
           value = get<double>(left.value()) + get<double>(right.value());
         } else if (holds_alternative<string>(left.value()) && holds_alternative<string>(right.value())) {
           value = get<string>(left.value()) + get<string>(right.value());
+        } else {
+          setError("Operands for '" + expr->op.lexeme + "' must both be numbers or strings");
         }
         break;
 
@@ -69,7 +111,11 @@ struct Interpreter : public Visitor {
 
     switch (expr->op.type) {
       case TokenType::MINUS:
-        value = -get<double>(right.value());
+        if (checkNumber(expr->op, right)) {
+          value = -get<double>(right.value());
+        } else {
+          value = nullopt;
+        }
         break;
 
       case TokenType::BANG:
@@ -83,6 +129,25 @@ struct Interpreter : public Visitor {
 
   void visitLiteralExpr(LiteralExpr* expr) override {
     value = expr->value;
+  }
+
+  bool checkNumber(Token op, Value val) {
+    if (!val.has_value() || !holds_alternative<double>(val.value())) {
+      setError("Operand for '" + op.lexeme + "' must be a number");
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  bool checkNumbers(Token op, Value left, Value right) {
+    if (!left.has_value() || !right.has_value() 
+        || !holds_alternative<double>(left.value()) || !holds_alternative<double>(right.value())) {
+      setError("Operands for '" + op.lexeme + "' must be numbers");
+      return false;
+    } else {
+      return true;
+    }
   }
 
   bool isTruthy(Value value) {

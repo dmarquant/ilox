@@ -33,7 +33,12 @@ void run(string src) {
   
   if (expr) {
     Interpreter interpreter;
-    cout << "= " << interpreter.eval(expr);
+    Value val = interpreter.eval(expr);
+    if (interpreter.error.empty()) {
+      cout << "= " << val;
+    } else {
+      cout << "Error while evaluating: " << interpreter.error;
+    }
     cout << endl;
   }
 }
