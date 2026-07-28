@@ -33,17 +33,15 @@ void run(string src) {
   // Expressions are leaked for now. To fix that I can simply add an arena allocator
   // for the parser and discard the whole thing once I'm done.
 
-  Expr* expr = parseExpr(tokens);
-  
-  if (expr) {
-    Interpreter interpreter;
-    Value val = interpreter.eval(expr);
-    if (interpreter.error.empty()) {
-      cout << "= " << val;
-    } else {
-      cout << "Error while evaluating: " << interpreter.error;
+  Interpreter interpreter;
+
+  vector<Stmt> statements = parseStatements(tokens);
+  for (const Stmt& stmt : statements) {
+    interpreter.execute(&stmt);    
+    if (!interpreter.error.empty()) {
+      cout << "Error while evaluating: " << interpreter.error << endl;
+      break;
     }
-    cout << endl;
   }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "expr.h"
+#include "stmt.h"
 #include "token.h"
 
 using namespace std;
@@ -10,6 +11,35 @@ struct Parser {
 
   int current = 0;
   bool hasError = false;
+
+  vector<Stmt> parse() {
+    vector<Stmt> statements;
+    while (!isAtEnd()) {
+      statements.push_back(stmt());
+    }
+    return statements;    
+  }
+
+  Stmt stmt() {
+    if (match(TokenType::PRINT)) return printStmt();
+    return exprStmt();
+  }
+
+  Stmt printStmt() {
+    Expr* value = expr();
+
+    advance(); // TODO: Check for ';'!
+
+    return PrintStmt(value);
+  }
+
+  Stmt exprStmt() {
+    Expr* value = expr();
+
+    advance(); // TODO: Check for ';'!
+
+    return ExpressionStmt(value);
+  }
 
   Expr* expr() {
     return hasError ? nullptr : comma();
@@ -131,9 +161,9 @@ struct Parser {
   }
 };
 
-Expr* parseExpr(const vector<Token>& tokens) {
+vector<Stmt> parseStatements(const vector<Token>& tokens) {
   Parser p{
     .tokens = tokens
   };
-  return p.expr();
+  return p.parse();
 }

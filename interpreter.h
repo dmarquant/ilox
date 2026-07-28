@@ -1,6 +1,7 @@
 #pragma once
 
 #include "expr.h"
+#include "stmt.h"
 
 using namespace std;
 
@@ -10,6 +11,20 @@ struct Interpreter {
 
   Value eval(Expr* expr) {
     return visit(*this, *expr);
+  }
+
+  void execute(const Stmt* stmt) {
+    return visit(*this, *stmt);
+  }
+
+  void operator () (const PrintStmt& stmt) {
+    Value val = eval(stmt.expr);
+    cout << val << endl;
+  }
+
+  void operator () (const ExpressionStmt& stmt) {
+    Value val = eval(stmt.expr);
+    // Could do nothing, since expressions can't have sideeffects (yet)
   }
 
   Value operator() (const BinaryExpr& expr) {
