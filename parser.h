@@ -28,7 +28,10 @@ struct Parser {
   Stmt printStmt() {
     Expr* value = expr();
 
-    advance(); // TODO: Check for ';'!
+    if (!match(TokenType::SEMICOLON)) {
+      hasError = true;
+      error(peek().line, "Expected ';' after expression");
+    }
 
     return PrintStmt(value);
   }
@@ -36,7 +39,10 @@ struct Parser {
   Stmt exprStmt() {
     Expr* value = expr();
 
-    advance(); // TODO: Check for ';'!
+    if (!match(TokenType::SEMICOLON)) {
+      hasError = true;
+      error(peek().line, "Expected ';' after expression");
+    }
 
     return ExpressionStmt(value);
   }
@@ -161,9 +167,14 @@ struct Parser {
   }
 };
 
-vector<Stmt> parseStatements(const vector<Token>& tokens) {
+optional<vector<Stmt>> parseStatements(const vector<Token>& tokens) {
   Parser p{
     .tokens = tokens
   };
-  return p.parse();
+  auto statements = p.parse();
+  if (p.hasError) {
+    return nullopt;
+  } else {
+    return statements;
+  }
 }

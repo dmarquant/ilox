@@ -35,12 +35,14 @@ void run(string src) {
 
   Interpreter interpreter;
 
-  vector<Stmt> statements = parseStatements(tokens);
-  for (const Stmt& stmt : statements) {
-    interpreter.execute(&stmt);    
-    if (!interpreter.error.empty()) {
-      cout << "Error while evaluating: " << interpreter.error << endl;
-      break;
+  optional<vector<Stmt>> result = parseStatements(tokens);
+  if (result.has_value()) {
+    for (const Stmt& stmt : result.value()) {
+      interpreter.execute(&stmt);    
+      if (!interpreter.error.empty()) {
+        cout << "Error while evaluating: " << interpreter.error << endl;
+        break;
+      }
     }
   }
 }
