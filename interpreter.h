@@ -2,12 +2,15 @@
 
 #include "expr.h"
 #include "stmt.h"
+#include "environment.h"
 
 using namespace std;
 
 
 struct Interpreter {
   string error = "";
+
+  Environment environment;
 
   Value eval(Expr* expr) {
     return visit(*this, *expr);
@@ -29,7 +32,18 @@ struct Interpreter {
 
   void operator () (const VarStmt& stmt) {
     Value val = stmt.initializer ? eval(stmt.initializer) : nullptr;
-    cout << "Setting variable '" << stmt.name << "' to " << val << endl;
+    environment.define(stmt.name, val);
+  }
+
+  Value operator() (const AssignmentExpr& expr) {
+    if (environment.has(expr.name)) {
+      Value val = eval(expr.val);
+      environment.define(expr.name, val);
+      return val;
+    } else {
+      setError("Undefined variable '" + expr.name + "'");
+      return nullptr;
+    }
   }
 
   Value operator() (const BinaryExpr& expr) {
@@ -111,12 +125,23 @@ struct Interpreter {
     }
     return nullptr;
   }
+
   Value operator() (const GroupingExpr& expr) {
     return eval(expr.expr);
   }
 
   Value operator() (const LiteralExpr& expr) {
     return expr.value;
+  }
+
+  Value operator() (const VarExpr& expr) {
+    auto val = environment.get(expr.name);
+    if (val.has_value()) {
+      return val.value();
+    } else {
+      setError("Variable '" + expr.name + "' is not defined");
+      return nullptr;
+    }
   }
 
   Value operator() (const UnaryExpr& expr) {

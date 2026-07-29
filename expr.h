@@ -1,17 +1,25 @@
 #pragma once
 
-#include <memory>
 #include <iostream>
 #include "token.h"
 
 using namespace std;
 
+struct AssignmentExpr;
 struct BinaryExpr;
 struct GroupingExpr;
 struct LiteralExpr;
+struct VarExpr;
 struct UnaryExpr;
 
-using Expr = variant<BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr>;
+using Expr = variant<AssignmentExpr, BinaryExpr, GroupingExpr, LiteralExpr, VarExpr, UnaryExpr>;
+
+struct AssignmentExpr {
+  string name;
+  Expr* val;
+
+  AssignmentExpr(string name, Expr* val) : name(name), val(val) {}
+};
 
 struct BinaryExpr {
   Expr* left;
@@ -31,6 +39,12 @@ struct LiteralExpr {
   Value value;
 
   LiteralExpr(Value val) : value(val) {}
+};
+
+struct VarExpr {
+  string name;
+
+  VarExpr(string name) : name(name) {}
 };
 
 struct UnaryExpr {

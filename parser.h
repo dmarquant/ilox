@@ -85,12 +85,29 @@ struct Parser {
   }
 
   Expr* comma() {
-    Expr* expr = equality();
+    Expr* expr = assignment();
 
     while (match(TokenType::COMMA)) {
       Token op = previous();
       Expr* right = comma();
       *expr = new Expr(BinaryExpr(expr, op, right));
+    }
+    return expr;
+  }
+
+  Expr* assignment() {
+    Expr* expr = equality();
+
+    if (match(TokenType::EQUAL)) {
+      Token equals = previous();
+      Expr* value = assignment();
+
+      if (holds_alternative<VarExpr>(*expr)) {
+        string name = get<VarExpr>(*expr).name;
+        return new Expr(AssignmentExpr(name, value));
+      }
+      error(equals.line, "Invalid assignment target.");
+      return nullptr;
     }
     return expr;
   }
@@ -157,6 +174,10 @@ struct Parser {
 
     if (match(TokenType::NUMBER) || match(TokenType::STRING)) {
       return new Expr(LiteralExpr(previous().literal));
+    }
+
+    if (match(TokenType::IDENTIFIER)) {
+      return new Expr(VarExpr(previous().lexeme));
     }
 
     if (match(TokenType::LEFT_PAREN)) {

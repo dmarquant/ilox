@@ -16,6 +16,7 @@
 using namespace std;
 
 bool hadError = false;
+Interpreter interpreter;
 
 
 void report(int line, string where, string message) {
@@ -30,11 +31,10 @@ void error(int line, string message) {
 void run(string src) {
   vector<Token> tokens = scanTokens(src);
 
+  interpreter.error = "";
+
   // Expressions are leaked for now. To fix that I can simply add an arena allocator
   // for the parser and discard the whole thing once I'm done.
-
-  Interpreter interpreter;
-
   optional<vector<Stmt*>> result = parseStatements(tokens);
   if (result.has_value()) {
     for (const Stmt* stmt : result.value()) {
