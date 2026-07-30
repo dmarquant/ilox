@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "expr.h"
+#include "stmt.h"
 #include "ilox.h"
 #include "scanner.h"
 #include "token.h"
@@ -37,6 +38,7 @@ void run(string src) {
   // for the parser and discard the whole thing once I'm done.
   optional<vector<Stmt*>> result = parseStatements(tokens);
   if (result.has_value()) {
+    interpreter.environment = &interpreter.globals; // TODO: Should happen somewhere inside
     for (const Stmt* stmt : result.value()) {
       interpreter.execute(stmt);    
       if (!interpreter.error.empty()) {

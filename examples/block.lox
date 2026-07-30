@@ -1,0 +1,8 @@
+var val = "outside";
+
+{
+  var val = "inside";
+  print "Inside: " + val;
+}
+
+print "Outside: " + val;

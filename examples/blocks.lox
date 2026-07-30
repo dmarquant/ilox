@@ -1,0 +1,15 @@
+var global = "g";
+
+{
+  print "l1: before = " + global;
+  global = "gl1";
+  print "l1: after = " + global;
+
+  {
+    print "l2: before = " + global;
+    global = "gl2";
+    print "l2: after = " + global;
+  }
+}
+
+print "final = " + global;

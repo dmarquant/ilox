@@ -10,7 +10,8 @@ using namespace std;
 struct Interpreter {
   string error = "";
 
-  Environment environment;
+  Environment globals;
+  Environment* environment;
 
   Value eval(Expr* expr) {
     return visit(*this, *expr);
@@ -18,6 +19,15 @@ struct Interpreter {
 
   void execute(const Stmt* stmt) {
     return visit(*this, *stmt);
+  }
+
+  void operator () (const BlockStmt& block) {
+    Environment scopeEnvironment{ .parent = environment };
+    environment = &scopeEnvironment;
+    for (const Stmt* stmt : block.statements) {
+      execute(stmt);
+    }
+    environment = scopeEnvironment.parent;
   }
 
   void operator () (const PrintStmt& stmt) {
@@ -32,13 +42,13 @@ struct Interpreter {
 
   void operator () (const VarStmt& stmt) {
     Value val = stmt.initializer ? eval(stmt.initializer) : nullptr;
-    environment.define(stmt.name, val);
+    environment->define(stmt.name, val);
   }
 
   Value operator() (const AssignmentExpr& expr) {
-    if (environment.has(expr.name)) {
+    if (environment->has(expr.name)) {
       Value val = eval(expr.val);
-      environment.define(expr.name, val);
+      environment->define(expr.name, val);
       return val;
     } else {
       setError("Undefined variable '" + expr.name + "'");
@@ -135,7 +145,7 @@ struct Interpreter {
   }
 
   Value operator() (const VarExpr& expr) {
-    auto val = environment.get(expr.name);
+    auto val = environment->get(expr.name);
     if (val.has_value()) {
       return val.value();
     } else {

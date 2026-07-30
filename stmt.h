@@ -1,10 +1,24 @@
 #pragma once
 
-#include <iostream>
 #include "expr.h"
 #include "token.h"
+#include <variant>
+#include <vector>
 
 using namespace std;
+
+struct BlockStmt;
+struct ExpressionStmt;
+struct PrintStmt;
+struct VarStmt;
+
+using Stmt = variant<BlockStmt, PrintStmt, ExpressionStmt, VarStmt>;
+
+struct BlockStmt {
+  vector<Stmt*> statements;
+
+  BlockStmt(vector<Stmt*> statements);
+};
 
 struct PrintStmt {
   Expr* expr;
@@ -25,5 +39,4 @@ struct VarStmt {
   VarStmt(string name, Expr* initializer) : name(name), initializer(initializer) {}
 };
 
-using Stmt = variant<PrintStmt, ExpressionStmt, VarStmt>;
-
+BlockStmt::BlockStmt(vector<Stmt*> statements) : statements(statements) {}
