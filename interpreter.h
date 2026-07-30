@@ -21,6 +21,17 @@ struct Interpreter {
     return visit(*this, *stmt);
   }
 
+  void operator () (const WhileStmt& whileStmt) {
+    while (true) {
+      Value conditionVal = eval(whileStmt.condition);
+      if (!isTruthy(conditionVal)) {
+        break;
+      } else {
+        execute(whileStmt.body);
+      }
+    }
+  }
+
   void operator () (const IfStmt& ifStmt) {
     Value conditionVal = eval(ifStmt.condition);
     if (isTruthy(conditionVal)) {
@@ -57,7 +68,7 @@ struct Interpreter {
   Value operator() (const AssignmentExpr& expr) {
     if (environment->has(expr.name)) {
       Value val = eval(expr.val);
-      environment->define(expr.name, val);
+      environment->assign(expr.name, val);
       return val;
     } else {
       setError("Undefined variable '" + expr.name + "'");

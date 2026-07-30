@@ -12,8 +12,9 @@ struct ExpressionStmt;
 struct IfStmt;
 struct PrintStmt;
 struct VarStmt;
+struct WhileStmt;
 
-using Stmt = variant<BlockStmt, IfStmt, ExpressionStmt, PrintStmt, VarStmt>;
+using Stmt = variant<BlockStmt, IfStmt, ExpressionStmt, PrintStmt, VarStmt, WhileStmt>;
 
 struct BlockStmt {
   vector<Stmt*> statements;
@@ -47,6 +48,13 @@ struct VarStmt {
   Expr* initializer;
 
   VarStmt(string name, Expr* initializer) : name(name), initializer(initializer) {}
+};
+
+struct WhileStmt {
+  Expr* condition;
+  Stmt* body;
+
+  WhileStmt(Expr* condition, Stmt* body) : condition(condition), body(body) {}
 };
 
 BlockStmt::BlockStmt(vector<Stmt*> statements) : statements(statements) {}

@@ -54,8 +54,28 @@ struct Parser {
   Stmt* stmt() {
     if (match(TokenType::PRINT)) return printStmt();
     if (match(TokenType::LEFT_BRACE)) return blockStmt();
-    if (match(TokenType::IF)) return ifStmt();
+    if (match(TokenType::IF)) return ifStmt(); // TODO: OR/AND expressions are missing
+    if (match(TokenType::WHILE)) return whileStmt();
     return exprStmt();
+  }
+
+  Stmt* whileStmt() {
+    if (!match(TokenType::LEFT_PAREN)) {
+      hasError = true;
+      error(peek().line, "Expected '(' after while");
+      return nullptr;
+    }
+
+    Expr* condition = expr();
+
+    if (!match(TokenType::RIGHT_PAREN)) {
+      hasError = true;
+      error(peek().line, "Expected ')' after while condition");
+      return nullptr;
+    }
+
+    Stmt* body = stmt();
+    return new Stmt(WhileStmt(condition, body));
   }
 
   Stmt* ifStmt() {

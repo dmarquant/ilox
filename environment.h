@@ -14,6 +14,17 @@ struct Environment {
     values[name] = value;
   }
 
+  void assign(const string& name, Value value) {
+    if (values.contains(name)) {
+      values[name] = value;
+    } else if (parent) {
+      return parent->assign(name, value);
+    } else {
+      assert(0);
+    }
+    
+  }
+
   bool has(const string& name) {
     if (values.contains(name)) {
       return true;
