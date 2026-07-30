@@ -78,67 +78,75 @@ struct Interpreter {
 
   Value operator() (const BinaryExpr& expr) {
     Value left = eval(expr.left);
+
+    if (expr.op.type == TokenType::AND) {
+      if (!isTruthy(left)) {
+        return false;
+      } else {
+        return isTruthy(eval(expr.right));
+      }
+    }
+
+    if (expr.op.type == TokenType::OR) {
+      if (isTruthy(left)) {
+        return true;
+      } else {
+        return isTruthy(eval(expr.right));
+      }
+    }
+
     Value right = eval(expr.right);
 
     switch (expr.op.type) {
       case TokenType::COMMA:
         return right;
-        break;
       case TokenType::EQUAL_EQUAL:
         return left == right;
-        break;
       case TokenType::BANG_EQUAL:
         return left != right;
-        break;
       case TokenType::GREATER:
         if (checkNumbers(expr.op, left, right)) {
           return get<double>(left) > get<double>(right);
         } else {
           return nullptr;
         }
-        break;
       case TokenType::GREATER_EQUAL:
         if (checkNumbers(expr.op, left, right)) {
           return get<double>(left) >= get<double>(right);
         } else {
           return nullptr;
         }
-        break;
       case TokenType::LESS:
         if (checkNumbers(expr.op, left, right)) {
           return get<double>(left) < get<double>(right);
         } else {
           return nullptr;
         }
-        break;
       case TokenType::LESS_EQUAL:
         if (checkNumbers(expr.op, left, right)) {
           return get<double>(left) <= get<double>(right);
         } else {
           return nullptr;
         }
-        break;
       case TokenType::MINUS:
         if (checkNumbers(expr.op, left, right)) {
           return get<double>(left) - get<double>(right);
         } else {
           return nullptr;
         }
-        break;
       case TokenType::SLASH:
         if (checkNumbers(expr.op, left, right)) {
           return get<double>(left) / get<double>(right);
         } else {
           return nullptr;
         }
-        break;
       case TokenType::STAR:
         if (checkNumbers(expr.op, left, right)) {
           return get<double>(left) * get<double>(right);
         } else {
           return nullptr;
         }
-        break;
+        
 
       case TokenType::PLUS:
         if (holds_alternative<double>(left) && holds_alternative<double>(right)) {

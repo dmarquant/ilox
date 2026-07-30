@@ -151,7 +151,7 @@ struct Parser {
   }
 
   Expr* assignment() {
-    Expr* expr = equality();
+    Expr* expr = orExpr();
 
     if (match(TokenType::EQUAL)) {
       Token equals = previous();
@@ -163,6 +163,26 @@ struct Parser {
       }
       error(equals.line, "Invalid assignment target.");
       return nullptr;
+    }
+    return expr;
+  }
+
+  Expr* orExpr() {
+    Expr* expr = andExpr();
+    while (match(TokenType::OR)) {
+      Token op = previous();
+      Expr* right = orExpr();
+      expr = new Expr(BinaryExpr(expr, op, right));
+    }
+    return expr;
+  }
+
+  Expr* andExpr() {
+    Expr* expr = equality();
+    while (match(TokenType::AND)) {
+      Token op = previous();
+      Expr* right = andExpr();
+      expr = new Expr(BinaryExpr(expr, op, right));
     }
     return expr;
   }
