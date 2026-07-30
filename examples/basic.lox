@@ -1,0 +1,4 @@
+var name = "Max";
+var msg = "Hello";
+
+print msg + ", " + name;
