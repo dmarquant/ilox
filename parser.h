@@ -15,21 +15,9 @@ struct Parser {
   vector<Stmt*> parse() {
     vector<Stmt*> statements;
     while (!isAtEnd()) {
-      statements.push_back(block());
+      statements.push_back(declaration());
     }
     return statements;    
-  }
-
-  Stmt* block() {
-    if (match(TokenType::LEFT_BRACE)) {
-      vector<Stmt*> statements;
-      while (!match(TokenType::RIGHT_BRACE)) {
-        statements.push_back(block());
-      }
-      return new Stmt(BlockStmt(statements));
-    } else {
-      return declaration();
-    }
   }
 
   Stmt* declaration() {
@@ -65,7 +53,16 @@ struct Parser {
 
   Stmt* stmt() {
     if (match(TokenType::PRINT)) return printStmt();
+    if (match(TokenType::LEFT_BRACE)) return blockStmt();
     return exprStmt();
+  }
+
+  Stmt* blockStmt() {
+      vector<Stmt*> statements;
+      while (!match(TokenType::RIGHT_BRACE)) {
+        statements.push_back(declaration());
+      }
+      return new Stmt(BlockStmt(statements));
   }
 
   Stmt* printStmt() {
