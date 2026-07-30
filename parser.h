@@ -54,7 +54,33 @@ struct Parser {
   Stmt* stmt() {
     if (match(TokenType::PRINT)) return printStmt();
     if (match(TokenType::LEFT_BRACE)) return blockStmt();
+    if (match(TokenType::IF)) return ifStmt();
     return exprStmt();
+  }
+
+  Stmt* ifStmt() {
+    if (!match(TokenType::LEFT_PAREN)) {
+      hasError = true;
+      error(peek().line, "Expected '(' after if");
+      return nullptr;
+    }
+
+    Expr* condition = expr();
+
+    if (!match(TokenType::RIGHT_PAREN)) {
+      hasError = true;
+      error(peek().line, "Expected ')' after if condition");
+      return nullptr;
+    }
+
+    Stmt* thenBranch = stmt();
+
+    Stmt* elseBranch = nullptr;
+    if (match(TokenType::ELSE)) {
+      elseBranch = stmt();
+    }
+
+    return new Stmt(IfStmt(condition, thenBranch, elseBranch));
   }
 
   Stmt* blockStmt() {

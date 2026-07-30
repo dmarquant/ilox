@@ -9,10 +9,11 @@ using namespace std;
 
 struct BlockStmt;
 struct ExpressionStmt;
+struct IfStmt;
 struct PrintStmt;
 struct VarStmt;
 
-using Stmt = variant<BlockStmt, PrintStmt, ExpressionStmt, VarStmt>;
+using Stmt = variant<BlockStmt, IfStmt, ExpressionStmt, PrintStmt, VarStmt>;
 
 struct BlockStmt {
   vector<Stmt*> statements;
@@ -30,6 +31,15 @@ struct ExpressionStmt {
   Expr* expr;
 
   ExpressionStmt(Expr* expr) : expr(expr) {}
+};
+
+struct IfStmt {
+  Expr* condition;
+  Stmt* thenBranch;
+  Stmt* elseBranch;
+
+  IfStmt(Expr* condition, Stmt* thenBranch, Stmt* elseBranch) 
+    : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
 };
 
 struct VarStmt {

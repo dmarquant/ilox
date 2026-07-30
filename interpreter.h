@@ -21,6 +21,15 @@ struct Interpreter {
     return visit(*this, *stmt);
   }
 
+  void operator () (const IfStmt& ifStmt) {
+    Value conditionVal = eval(ifStmt.condition);
+    if (isTruthy(conditionVal)) {
+      execute(ifStmt.thenBranch);
+    } else if (ifStmt.elseBranch) {
+      execute(ifStmt.elseBranch);
+    }
+  }
+
   void operator () (const BlockStmt& block) {
     Environment scopeEnvironment{ .parent = environment };
     environment = &scopeEnvironment;
