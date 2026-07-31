@@ -1,0 +1,9 @@
+var start = clock();
+var str = "";
+for (var i = 0; i < 50000; i = i + 1) {
+  str = str + tostr(i);
+}
+print(str);
+var stop = clock();
+
+print("Program ran for " + tostr(stop - start) + " seconds");

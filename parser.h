@@ -54,7 +54,7 @@ struct Parser {
   Stmt* stmt() {
     if (match(TokenType::PRINT)) return printStmt();
     if (match(TokenType::LEFT_BRACE)) return blockStmt();
-    if (match(TokenType::IF)) return ifStmt(); // TODO: OR/AND expressions are missing
+    if (match(TokenType::IF)) return ifStmt(); 
     if (match(TokenType::WHILE)) return whileStmt();
     if (match(TokenType::FOR)) return forStmt();
     return exprStmt();
@@ -285,7 +285,33 @@ struct Parser {
       Expr* right = unary();
       return new Expr(UnaryExpr(op, right));
     }
-    return primary();
+    return call();
+  }
+
+  Expr* call() {
+    Expr* callee = primary();
+    while (true) {
+      if (match(TokenType::LEFT_PAREN)) {
+        callee = finishCall(callee);
+      } else {
+        break;
+      }
+    }
+    return callee;
+  }
+
+  Expr* finishCall(Expr* callee) {
+    vector<Expr*> arguments;
+    if (peek().type != TokenType::RIGHT_PAREN) {
+      do {
+        arguments.push_back(expr());
+      } while (match(TokenType::COMMA));
+    }
+
+    if (!expect(TokenType::RIGHT_PAREN, "Expected ')' after argument list"))
+      return nullptr;
+
+    return new Expr(CallExpr(callee, arguments));
   }
 
   Expr* primary() {

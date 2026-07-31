@@ -3,15 +3,25 @@
 #include "expr.h"
 #include "stmt.h"
 #include "environment.h"
+#include "builtins.h"
 
 using namespace std;
 
+static ClockBuiltin clockBuiltin;
+static TostrBuiltin tostrBuiltin;
+static PrintBuiltin printBuiltin;
 
 struct Interpreter {
   string error = "";
 
   Environment globals;
   Environment* environment;
+
+  Interpreter() {
+    globals.define("clock", &clockBuiltin);
+    globals.define("tostr", &tostrBuiltin);
+    globals.define("print", &printBuiltin); // TODO: Remove the print keyword, otherwise this is not used
+  }
 
   Value eval(Expr* expr) {
     return visit(*this, *expr);
@@ -202,6 +212,26 @@ struct Interpreter {
       default:
         return nullptr;
     }
+  }
+
+  Value operator() (const CallExpr& expr) {
+    Value callee = eval(expr.callee);
+    if (!holds_alternative<Function*>(callee)) {
+      setError("Can only call functions and classes");
+      return nullptr;
+    }
+
+    vector<Value> vals;
+    for (Expr* arg : expr.arguments) {
+      vals.push_back(eval(arg));
+    }
+
+    if (vals.size() != get<Function*>(callee)->arity()) {
+      setError("Number of arguments doesn't match");
+      return nullptr;
+    }
+
+    return get<Function*>(callee)->call(this, vals);
   }
 
   void setError(string err) {

@@ -4,6 +4,8 @@
 #include <string>
 #include <variant>
 
+struct Interpreter;
+
 using namespace std;
 
 enum class TokenType {
@@ -70,7 +72,14 @@ constexpr std::string_view tokenTypeToString(TokenType type) {
     return "UNKNOWN";
 }
 
-using Value = variant<bool, double, string, nullptr_t>;
+
+using Value = variant<bool, double, string, struct Function*, nullptr_t>;
+
+struct Function {
+  virtual int arity() = 0;
+
+  virtual Value call(Interpreter* interpreter, const vector<Value>& arguments) = 0;
+};
 
 struct Token {
     TokenType type;
