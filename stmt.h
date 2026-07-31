@@ -7,14 +7,15 @@
 
 using namespace std;
 
-struct BlockStmt;
-struct ExpressionStmt;
-struct IfStmt;
-struct PrintStmt;
-struct VarStmt;
-struct WhileStmt;
 
-using Stmt = variant<BlockStmt, IfStmt, ExpressionStmt, PrintStmt, VarStmt, WhileStmt>;
+using Stmt = variant<
+  struct BlockStmt,
+  struct ExpressionStmt,
+  struct IfStmt,
+  struct PrintStmt,
+  struct VarStmt,
+  struct WhileStmt
+>;
 
 struct BlockStmt {
   vector<Stmt*> statements;
@@ -33,6 +34,7 @@ struct ExpressionStmt {
 
   ExpressionStmt(Expr* expr) : expr(expr) {}
 };
+
 
 struct IfStmt {
   Expr* condition;

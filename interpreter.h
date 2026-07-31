@@ -61,6 +61,7 @@ struct Interpreter {
   }
 
   void operator () (const VarStmt& stmt) {
+
     Value val = stmt.initializer ? eval(stmt.initializer) : nullptr;
     environment->define(stmt.name, val);
   }

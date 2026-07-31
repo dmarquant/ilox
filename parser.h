@@ -56,8 +56,54 @@ struct Parser {
     if (match(TokenType::LEFT_BRACE)) return blockStmt();
     if (match(TokenType::IF)) return ifStmt(); // TODO: OR/AND expressions are missing
     if (match(TokenType::WHILE)) return whileStmt();
+    if (match(TokenType::FOR)) return forStmt();
     return exprStmt();
   }
+
+  Stmt* forStmt() {
+    if (!expect(TokenType::LEFT_PAREN, "Expected '(' after for"))
+      return nullptr;
+
+    Stmt* initializer = nullptr;
+    if (match(TokenType::SEMICOLON)) {
+      // nothing todo
+    } else if (match(TokenType::VAR)) {
+      initializer = varDeclaration();
+    } else {
+      initializer = exprStmt();
+    }
+
+    Expr* condition = nullptr;
+    if (peek().type != TokenType::SEMICOLON) {
+      condition = expr();
+    } else {
+      condition = new Expr(LiteralExpr(true));
+    }
+
+    if (!expect(TokenType::SEMICOLON, "Expected ';' after for condition"))
+      return nullptr;
+
+    Expr* increment = nullptr;
+    if (peek().type != TokenType::RIGHT_PAREN) {
+      increment = expr();      
+    }
+
+    if (!expect(TokenType::RIGHT_PAREN, "Expected ')' after for increment"))
+      return nullptr;
+
+    Stmt* body = stmt();
+    if (increment) {
+      body = new Stmt(BlockStmt({body, new Stmt(ExpressionStmt(increment))}));
+    }
+
+    body = new Stmt(WhileStmt(condition, body));
+
+    if (initializer) {
+      body = new Stmt(BlockStmt({initializer, body}));
+    }
+    return body;
+  }
+
 
   Stmt* whileStmt() {
     if (!match(TokenType::LEFT_PAREN)) {
@@ -275,6 +321,16 @@ struct Parser {
       return true;
     }
     return false;
+  }
+
+  bool expect(TokenType type, string msg) {
+    if (!match(type)) {
+      hasError = true;
+      error(peek().line, msg);
+      return false;
+    } else {
+      return true;
+    }
   }
 
   bool isAtEnd() {
