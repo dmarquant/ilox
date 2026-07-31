@@ -2,7 +2,7 @@ var val = "outside";
 
 {
   var val = "inside";
-  print "Inside: " + val;
+  print("Inside: " + val);
 }
 
-print "Outside: " + val;
+print("Outside: " + val);

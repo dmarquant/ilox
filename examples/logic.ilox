@@ -1,24 +1,22 @@
 // just and
 var a = 10;
 if (0 <= a and a < 100) {
-  print "a is between 0 and 100";
+  print("a is between 0 and 100");
 }
 
 // and + or, checks precendence
 var b = -10;
 if (0 <= b and b < 100 or b == -10) {
-  print "b is between 0 and 100 or -10";
+  print("b is between 0 and 100 or -10");
 }
 
 // short circuit
 var c = 0;
 if (a == 10 or (c = 1)) {
-  print "c is still:";
-  print c;
+  print("c is still:" + tostr(c));
 }
 
 if (a == -10 and (c = 1)) {
-  print "Should't run";
+  print("Should't run");
 }
-print "c is still:";
-print c;
+print("c is still:" + tostr(c));

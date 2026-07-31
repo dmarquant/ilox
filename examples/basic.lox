@@ -1,4 +1,4 @@
 var name = "Max";
 var msg = "Hello";
 
-print msg + ", " + name;
+print(msg + ", " + name);

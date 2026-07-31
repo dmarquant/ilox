@@ -12,7 +12,6 @@ using Stmt = variant<
   struct BlockStmt,
   struct ExpressionStmt,
   struct IfStmt,
-  struct PrintStmt,
   struct VarStmt,
   struct WhileStmt
 >;
@@ -21,12 +20,6 @@ struct BlockStmt {
   vector<Stmt*> statements;
 
   BlockStmt(vector<Stmt*> statements);
-};
-
-struct PrintStmt {
-  Expr* expr;
-
-  PrintStmt(Expr* expr) : expr(expr) {}
 };
 
 struct ExpressionStmt {

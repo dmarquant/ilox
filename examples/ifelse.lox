@@ -1,7 +1,7 @@
 var a = 4;
 
 if (a == 3) {
-  print "a is 3";
+  print("a is 3");
 } else {
-  print "a is not 3";
+  print("a is not 3");
 }

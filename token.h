@@ -18,7 +18,7 @@ enum class TokenType {
     IDENTIFIER, STRING, NUMBER,
 
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
-    PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
+    RETURN, SUPER, THIS, TRUE, VAR, WHILE,
 
     END_OF_FILE
 };
@@ -59,7 +59,6 @@ constexpr std::string_view tokenTypeToString(TokenType type) {
         case TokenType::IF:            return "IF";
         case TokenType::NIL:           return "NIL";
         case TokenType::OR:            return "OR";
-        case TokenType::PRINT:         return "PRINT";
         case TokenType::RETURN:        return "RETURN";
         case TokenType::SUPER:         return "SUPER";
         case TokenType::THIS:          return "THIS";

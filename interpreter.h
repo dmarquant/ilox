@@ -20,7 +20,7 @@ struct Interpreter {
   Interpreter() {
     globals.define("clock", &clockBuiltin);
     globals.define("tostr", &tostrBuiltin);
-    globals.define("print", &printBuiltin); // TODO: Remove the print keyword, otherwise this is not used
+    globals.define("print", &printBuiltin); 
   }
 
   Value eval(Expr* expr) {
@@ -58,11 +58,6 @@ struct Interpreter {
       execute(stmt);
     }
     environment = scopeEnvironment.parent;
-  }
-
-  void operator () (const PrintStmt& stmt) {
-    Value val = eval(stmt.expr);
-    cout << val << endl;
   }
 
   void operator () (const ExpressionStmt& stmt) {

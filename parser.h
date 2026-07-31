@@ -52,7 +52,6 @@ struct Parser {
   }
 
   Stmt* stmt() {
-    if (match(TokenType::PRINT)) return printStmt();
     if (match(TokenType::LEFT_BRACE)) return blockStmt();
     if (match(TokenType::IF)) return ifStmt(); 
     if (match(TokenType::WHILE)) return whileStmt();
@@ -155,18 +154,6 @@ struct Parser {
         statements.push_back(declaration());
       }
       return new Stmt(BlockStmt(statements));
-  }
-
-  Stmt* printStmt() {
-    Expr* value = expr();
-
-    if (!match(TokenType::SEMICOLON)) {
-      hasError = true;
-      error(peek().line, "Expected ';' after expression");
-      return nullptr;
-    }
-
-    return new Stmt(PrintStmt(value));
   }
 
   Stmt* exprStmt() {
