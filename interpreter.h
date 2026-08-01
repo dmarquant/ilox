@@ -32,6 +32,8 @@ struct Interpreter {
   Environment globals;
   Environment* environment;
 
+  int callStackDepth = 0;
+
   Interpreter() {
     globals.define("clock", &clockBuiltin);
     globals.define("tostr", &tostrBuiltin);
@@ -54,6 +56,15 @@ struct Interpreter {
       } else {
         execute(whileStmt.body);
       }
+    }
+  }
+
+  void operator () (const ReturnStmt& returnStmt) {
+    if (callStackDepth > 0) {
+      Value val = eval(returnStmt.expr);
+      throw val;
+    } else {
+      setError("Cannot have return as toplevel statement");
     }
   }
 
@@ -244,7 +255,11 @@ struct Interpreter {
       return nullptr;
     }
 
-    return get<Function*>(callee)->call(this, vals);
+    callStackDepth++;
+    Value result = get<Function*>(callee)->call(this, vals);
+    callStackDepth--;
+    return result;
+
   }
 
   void setError(string err) {
@@ -293,11 +308,16 @@ Value UserDefinedFunction::call(Interpreter* interpreter, const vector<Value>& a
   }
 
   interpreter->environment = &scopeEnvironment;
-  for (const Stmt* stmt : body) {
-    interpreter->execute(stmt);
-  }
-  interpreter->environment = scopeEnvironment.parent;
 
-  // TODO: Handle return values
-  return nullptr;
+  Value returnVal = nullptr;
+  try {
+    for (const Stmt* stmt : body) {
+      interpreter->execute(stmt);
+    }
+  } catch (Value v) {
+    returnVal = v;
+  }
+
+  interpreter->environment = scopeEnvironment.parent;
+  return returnVal;
 }

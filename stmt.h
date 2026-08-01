@@ -13,6 +13,7 @@ using Stmt = variant<
   struct ExpressionStmt,
   struct FunctionDecl,
   struct IfStmt,
+  struct ReturnStmt,
   struct VarStmt,
   struct WhileStmt
 >;
@@ -44,6 +45,12 @@ struct IfStmt {
 
   IfStmt(Expr* condition, Stmt* thenBranch, Stmt* elseBranch) 
     : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
+};
+
+struct ReturnStmt {
+  Expr* expr;
+
+  ReturnStmt(Expr* expr) : expr(expr) {}
 };
 
 struct VarStmt {

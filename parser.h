@@ -91,7 +91,15 @@ struct Parser {
     if (match(TokenType::IF)) return ifStmt(); 
     if (match(TokenType::WHILE)) return whileStmt();
     if (match(TokenType::FOR)) return forStmt();
+    if (match(TokenType::RETURN)) return returnStmt();
     return exprStmt();
+  }
+
+  Stmt* returnStmt() {
+    Stmt* stmt = new Stmt(ReturnStmt(expr()));
+    if (!expect(TokenType::SEMICOLON, "Expected ';' after for condition"))
+      return nullptr;
+    return stmt;
   }
 
   Stmt* forStmt() {

@@ -1,0 +1,14 @@
+fun fib (n) {
+  if (n < 2) return n;
+  return fib(n-2) + fib(n-1);
+}
+
+var MAX = 30;
+var start = clock();
+for (var i = 1; i <= MAX; i = i + 1) {
+  var result = fib(i);
+  print("Fib of " + tostr(i) + " is " + tostr(result));
+}
+var stop = clock();
+
+print("Calculating the first " + tostr(MAX) + " fibonacci numbers took: " + tostr(stop - start) + "s");
