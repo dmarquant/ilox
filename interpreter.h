@@ -11,6 +11,21 @@ static ClockBuiltin clockBuiltin;
 static TostrBuiltin tostrBuiltin;
 static PrintBuiltin printBuiltin;
 
+
+struct UserDefinedFunction : public Function {
+  vector<string> parameterNames;
+  vector<Stmt*> body;
+
+  UserDefinedFunction(vector<string> parameterNames, vector<Stmt*> body) : 
+    parameterNames(parameterNames), body(body) {}
+
+  int arity() override {
+    return parameterNames.size();
+  }
+
+  Value call(Interpreter* interpreter, const vector<Value>& arguments) override;
+};
+
 struct Interpreter {
   string error = "";
 
@@ -65,8 +80,13 @@ struct Interpreter {
     // Could do nothing, since expressions can't have sideeffects (yet)
   }
 
-  void operator () (const VarStmt& stmt) {
+  void operator () (const FunctionDecl& decl) {
+    // TODO: This will be leaked for sure, it should be tied to the current environment
+    Function* func = new UserDefinedFunction(decl.parameterNames, decl.body);
+    environment->define(decl.name, func);
+  }
 
+  void operator () (const VarStmt& stmt) {
     Value val = stmt.initializer ? eval(stmt.initializer) : nullptr;
     environment->define(stmt.name, val);
   }
@@ -104,8 +124,6 @@ struct Interpreter {
     Value right = eval(expr.right);
 
     switch (expr.op.type) {
-      case TokenType::COMMA:
-        return right;
       case TokenType::EQUAL_EQUAL:
         return left == right;
       case TokenType::BANG_EQUAL:
@@ -264,3 +282,22 @@ struct Interpreter {
     }
   }
 };
+
+Value UserDefinedFunction::call(Interpreter* interpreter, const vector<Value>& arguments) {
+  assert(arguments.size() == parameterNames.size());
+
+  Environment scopeEnvironment{ .parent = interpreter->environment };
+
+  for (int i = 0; i < arguments.size(); i++) {
+    scopeEnvironment.define(parameterNames[i], arguments[i]);
+  }
+
+  interpreter->environment = &scopeEnvironment;
+  for (const Stmt* stmt : body) {
+    interpreter->execute(stmt);
+  }
+  interpreter->environment = scopeEnvironment.parent;
+
+  // TODO: Handle return values
+  return nullptr;
+}

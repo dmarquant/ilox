@@ -11,6 +11,7 @@ using namespace std;
 using Stmt = variant<
   struct BlockStmt,
   struct ExpressionStmt,
+  struct FunctionDecl,
   struct IfStmt,
   struct VarStmt,
   struct WhileStmt
@@ -28,6 +29,13 @@ struct ExpressionStmt {
   ExpressionStmt(Expr* expr) : expr(expr) {}
 };
 
+struct FunctionDecl {
+  string name;
+  vector<string> parameterNames;
+  vector<Stmt*> body;
+
+  FunctionDecl(string name, vector<string> parameterNames, vector<Stmt*> body);
+};
 
 struct IfStmt {
   Expr* condition;
@@ -53,3 +61,7 @@ struct WhileStmt {
 };
 
 BlockStmt::BlockStmt(vector<Stmt*> statements) : statements(statements) {}
+
+FunctionDecl::FunctionDecl(string name, vector<string> parameterNames, vector<Stmt*> body) :
+  name(name), parameterNames(parameterNames), body(body) {}
+

@@ -23,9 +23,44 @@ struct Parser {
   Stmt* declaration() {
     if (match(TokenType::VAR)) {
       return varDeclaration();
+    } else if (match(TokenType::FUN)) {
+      return functionDeclaration();
     } else {
       return stmt();
     }
+  }
+
+  Stmt* functionDeclaration() {
+    if (!expect(TokenType::IDENTIFIER, "Expected identifier after 'fun'")) {
+      return nullptr;
+    }
+
+    string functionName = previous().lexeme;
+
+    if (!expect(TokenType::LEFT_PAREN, "Expected '(' after function name")) {
+      return nullptr;
+    }
+
+    vector<string> parameterNames;
+    if (!match(TokenType::RIGHT_PAREN)) {
+      do {
+        if (!expect(TokenType::IDENTIFIER, "Expected identifier for parameter definition")) {
+          return nullptr;
+        }
+        parameterNames.push_back(previous().lexeme);
+
+      } while (match(TokenType::COMMA));
+
+      if (!expect(TokenType::RIGHT_PAREN, "Expected ')' after parameter list"))
+        return nullptr;
+    }
+
+    if (!expect(TokenType::LEFT_BRACE, "Expected function body after paramter list"))
+      return nullptr;
+
+    vector<Stmt*> body = blockStmt();
+
+    return new Stmt(FunctionDecl(functionName, parameterNames, body));
   }
 
   Stmt* varDeclaration() {
@@ -52,7 +87,7 @@ struct Parser {
   }
 
   Stmt* stmt() {
-    if (match(TokenType::LEFT_BRACE)) return blockStmt();
+    if (match(TokenType::LEFT_BRACE)) return new Stmt(BlockStmt(blockStmt()));
     if (match(TokenType::IF)) return ifStmt(); 
     if (match(TokenType::WHILE)) return whileStmt();
     if (match(TokenType::FOR)) return forStmt();
@@ -148,12 +183,12 @@ struct Parser {
     return new Stmt(IfStmt(condition, thenBranch, elseBranch));
   }
 
-  Stmt* blockStmt() {
+  vector<Stmt*> blockStmt() {
       vector<Stmt*> statements;
       while (!match(TokenType::RIGHT_BRACE)) {
         statements.push_back(declaration());
       }
-      return new Stmt(BlockStmt(statements));
+      return statements;
   }
 
   Stmt* exprStmt() {
@@ -169,18 +204,7 @@ struct Parser {
   }
 
   Expr* expr() {
-    return hasError ? nullptr : comma();
-  }
-
-  Expr* comma() {
-    Expr* expr = assignment();
-
-    while (match(TokenType::COMMA)) {
-      Token op = previous();
-      Expr* right = comma();
-      *expr = new Expr(BinaryExpr(expr, op, right));
-    }
-    return expr;
+    return hasError ? nullptr : assignment();
   }
 
   Expr* assignment() {

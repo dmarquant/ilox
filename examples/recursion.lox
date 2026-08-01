@@ -1,0 +1,8 @@
+fun countBackwards(n) {
+  print(n);
+  if (n > 1) {
+    countBackwards(n-1);
+  }
+}
+
+countBackwards(50);

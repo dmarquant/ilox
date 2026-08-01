@@ -1,0 +1,5 @@
+fun sayHello(firstname, lastname) {
+  print("Hello: " + firstname + ", " + lastname);
+}
+
+sayHello("Max", "S.");

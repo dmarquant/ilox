@@ -1,0 +1,15 @@
+var x = 4;
+fun printLocation() {
+  print("Outside x = " + tostr(x));
+}
+
+fun withNested() {
+  var x = 5;
+  fun printLocation() {
+    print("Inside x = " + tostr(x));
+  }
+  printLocation();
+}
+
+withNested();
+printLocation();
