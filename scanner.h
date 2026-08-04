@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "ilox.h"
+#include "util.h"
 #include "token.h"
 
 using namespace std;

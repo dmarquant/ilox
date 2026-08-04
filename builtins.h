@@ -36,9 +36,5 @@ struct PrintBuiltin : public Function {
     return 1;
   };
 
-  Value call(Interpreter* interpreter, const vector<Value>& arguments) override {
-    assert(arguments.size() == 1);
-    cout << arguments[0] << endl;
-    return arguments[0];
-  }
+  Value call(Interpreter* interpreter, const vector<Value>& arguments) override;
 };

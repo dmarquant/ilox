@@ -32,12 +32,26 @@ struct Interpreter {
   Environment globals;
   Environment* environment;
 
+  ostream& out = cout;
+
   int callStackDepth = 0;
 
-  Interpreter() {
+  Interpreter(ostream& out = cout) : out(out) {
     globals.define("clock", &clockBuiltin);
     globals.define("tostr", &tostrBuiltin);
     globals.define("print", &printBuiltin); 
+
+    environment = &globals;
+  }
+
+  bool run(const vector<Stmt*> statements) {
+    error = "";
+    for (const Stmt* stmt : statements) {
+      execute(stmt);
+      if (!error.empty())
+        return false;
+    }
+    return true;
   }
 
   Value eval(Expr* expr) {
@@ -321,3 +335,9 @@ Value UserDefinedFunction::call(Interpreter* interpreter, const vector<Value>& a
   interpreter->environment = scopeEnvironment.parent;
   return returnVal;
 }
+
+Value PrintBuiltin::call(Interpreter* interpreter, const vector<Value>& arguments) {
+  assert(arguments.size() == 1);
+  interpreter->out << arguments[0] << endl;
+  return arguments[0];
+};
